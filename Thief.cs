@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Thief : MonoBehaviour
@@ -13,15 +14,22 @@ public class Thief : MonoBehaviour
     private void Start()
     {
         _currentTarget = _pointB;
-    }
-    
-    private void Update()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, _currentTarget.position, _speed * Time.deltaTime);
         
-        if (Vector3.Distance(transform.position, _currentTarget.position) < _minDistance)
+        StartCoroutine(Move());
+    }
+
+    private IEnumerator Move()
+    {
+        while (enabled)
         {
-            _currentTarget = _currentTarget == _pointA ? _pointB : _pointA;
+            transform.position = Vector3.MoveTowards(transform.position, _currentTarget.position, _speed * Time.deltaTime);
+       
+            if (Vector3.Distance(transform.position, _currentTarget.position) < _minDistance)
+            {
+                _currentTarget = _currentTarget == _pointA ? _pointB : _pointA;
+            }
+
+            yield return null;
         }
     }
 }
