@@ -9,22 +9,22 @@ public class Thief : MonoBehaviour
     
     private Transform _currentTarget;
 
-    private float _minDistance = 0.1f;
+    private float _minDistanceSqr = 0.1f;
     
     private void Start()
     {
         _currentTarget = _pointB;
         
-        StartCoroutine(Move());
+        StartCoroutine(Moving());
     }
 
-    private IEnumerator Move()
+    private IEnumerator Moving()
     {
         while (enabled)
         {
             transform.position = Vector3.MoveTowards(transform.position, _currentTarget.position, _speed * Time.deltaTime);
        
-            if (Vector3.Distance(transform.position, _currentTarget.position) < _minDistance)
+            if ((transform.position - _currentTarget.position).sqrMagnitude < _minDistanceSqr)
             {
                 _currentTarget = _currentTarget == _pointA ? _pointB : _pointA;
             }

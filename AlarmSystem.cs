@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
@@ -8,7 +9,7 @@ public class AlarmSystem : MonoBehaviour
     [SerializeField] private float _volumeChangeSpeed = 0.5f;
     
     private AudioSource _audioSource;
-    private IEnumerator _changeVolumeRoutine;
+    private Coroutine _changeVolumeRoutine;
     
     private float _targetVolume;
     private float _minVolume = 0f;
@@ -16,7 +17,6 @@ public class AlarmSystem : MonoBehaviour
     private void Start()
     {
         _audioSource = GetComponent<AudioSource>();
-        _changeVolumeRoutine = ChangeVolume();
 
         _audioSource.volume = _minVolume;
         _audioSource.loop = true;
@@ -31,8 +31,7 @@ public class AlarmSystem : MonoBehaviour
             if(_audioSource.isPlaying == false)
                 _audioSource.Play();
             
-            StopCoroutine(_changeVolumeRoutine);
-            StartCoroutine(_changeVolumeRoutine);
+            _changeVolumeRoutine = StartCoroutine(ChangeVolume());
         }
     }
 
@@ -42,21 +41,28 @@ public class AlarmSystem : MonoBehaviour
         {
             _targetVolume = _minVolume;
             
-            StopCoroutine(_changeVolumeRoutine);
-            StartCoroutine(_changeVolumeRoutine);
+            _changeVolumeRoutine = StartCoroutine(ChangeVolume());
         }
     }
     
     private IEnumerator ChangeVolume()
     {
-        while (enabled)
+        while (!Mathf.Approximately(_audioSource.volume, _targetVolume))
         {
             _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _targetVolume, _volumeChangeSpeed * Time.deltaTime);
-        
-            if(_audioSource.volume <= 0 && _audioSource.isPlaying == true)
-                _audioSource.Stop();
 
             yield return null;
+        }
+        
+        if (_audioSource.volume <= _minVolume && _audioSource.isPlaying == true)
+        {
+            _audioSource.Stop();
+            
+            StopCoroutine(_changeVolumeRoutine);
+        }
+        else if (_audioSource.volume >= _maxVolume)
+        {
+            StopCoroutine(_changeVolumeRoutine);
         }
     }
 }
