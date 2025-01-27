@@ -31,6 +31,9 @@ public class AlarmSystem : MonoBehaviour
             if(_audioSource.isPlaying == false)
                 _audioSource.Play();
             
+            if(_changeVolumeRoutine != null)
+                StopCoroutine(_changeVolumeRoutine);
+            
             _changeVolumeRoutine = StartCoroutine(ChangeVolume());
         }
     }
@@ -40,6 +43,9 @@ public class AlarmSystem : MonoBehaviour
         if (collider.gameObject.TryGetComponent(out Thief thief))
         {
             _targetVolume = _minVolume;
+            
+            if(_changeVolumeRoutine != null)
+                StopCoroutine(_changeVolumeRoutine);
             
             _changeVolumeRoutine = StartCoroutine(ChangeVolume());
         }
@@ -57,12 +63,6 @@ public class AlarmSystem : MonoBehaviour
         if (_audioSource.volume <= _minVolume && _audioSource.isPlaying == true)
         {
             _audioSource.Stop();
-            
-            StopCoroutine(_changeVolumeRoutine);
-        }
-        else if (_audioSource.volume >= _maxVolume)
-        {
-            StopCoroutine(_changeVolumeRoutine);
         }
     }
 }
