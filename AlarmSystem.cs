@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
@@ -7,11 +6,10 @@ public class AlarmSystem : MonoBehaviour
 {
     [SerializeField] private float _maxVolume = 1.0f;
     [SerializeField] private float _volumeChangeSpeed = 0.5f;
-    
+   
     private AudioSource _audioSource;
     private Coroutine _changeVolumeRoutine;
-    
-    private float _targetVolume;
+   
     private float _minVolume = 0f;
 
     private void Start()
@@ -22,44 +20,34 @@ public class AlarmSystem : MonoBehaviour
         _audioSource.loop = true;
     }
 
-    private void OnTriggerEnter(Collider collider)
+    public void TurnOn()
     {
-        if (collider.gameObject.TryGetComponent(out Thief thief))
-        {
-            _targetVolume = _maxVolume;
-            
-            if(_audioSource.isPlaying == false)
-                _audioSource.Play();
-            
-            if(_changeVolumeRoutine != null)
-                StopCoroutine(_changeVolumeRoutine);
-            
-            _changeVolumeRoutine = StartCoroutine(ChangeVolume());
-        }
+        if(_audioSource.isPlaying == false)
+            _audioSource.Play();
+           
+        if(_changeVolumeRoutine != null)
+            StopCoroutine(_changeVolumeRoutine);
+           
+        _changeVolumeRoutine = StartCoroutine(ChangeVolume(_maxVolume));
     }
 
-    private void OnTriggerExit(Collider collider)
+    public void TurnOff()
     {
-        if (collider.gameObject.TryGetComponent(out Thief thief))
-        {
-            _targetVolume = _minVolume;
-            
             if(_changeVolumeRoutine != null)
                 StopCoroutine(_changeVolumeRoutine);
-            
-            _changeVolumeRoutine = StartCoroutine(ChangeVolume());
-        }
+           
+            _changeVolumeRoutine = StartCoroutine(ChangeVolume(_minVolume));
     }
-    
-    private IEnumerator ChangeVolume()
+   
+    private IEnumerator ChangeVolume(float targetVolume)
     {
-        while (!Mathf.Approximately(_audioSource.volume, _targetVolume))
+        while (Mathf.Approximately(_audioSource.volume, targetVolume) == false)
         {
-            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _targetVolume, _volumeChangeSpeed * Time.deltaTime);
+            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, targetVolume, _volumeChangeSpeed * Time.deltaTime);
 
             yield return null;
         }
-        
+       
         if (_audioSource.volume <= _minVolume && _audioSource.isPlaying == true)
         {
             _audioSource.Stop();
